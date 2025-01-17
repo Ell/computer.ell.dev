@@ -1,0 +1,37 @@
+name = "computer-ell-dev"
+main = "src/index.tsx"
+compatibility_date = "2025-01-15"
+assets = { directory = "./public", binding = "ASSETS"}
+compatibility_flags = [ "nodejs_compat" ]
+
+[[kv_namespaces]]
+binding = "KV"
+id = "ea9596c42fa24e45aaac873e42ee5402"
+
+[vars]
+DOMAIN = "computer.ell.dev"
+CLIENT_ID = "ellgapp"
+REDIRECT_URI = "https://computer.ell.dev/auth/redirect"
+
+[observability.logs]
+enabled = true
+
+# [[kv_namespaces]]
+# binding = "MY_KV_NAMESPACE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# [[r2_buckets]]
+# binding = "MY_BUCKET"
+# bucket_name = "my-bucket"
+
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "my-database"
+# database_id = ""
+
+# [ai]
+# binding = "AI"
+
+# [observability]
+# enabled = true
+# head_sampling_rate = 1

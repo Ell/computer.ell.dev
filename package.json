@@ -1,0 +1,17 @@
+{
+  "name": "computer-ell-dev",
+  "scripts": {
+    "watch": "bun build ./public/js/*.ts --outdir ./public/js --watch",
+    "dev": "wrangler dev --port 9094",
+    "deploy": "bun build ./public/js/*.ts --outdir ./public/js && wrangler deploy --minify"
+  },
+  "dependencies": {
+    "@twind/core": "^1.1.3",
+    "@twind/preset-tailwind": "^1.1.4",
+    "hono": "^4.6.16"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "wrangler": "^3.101.0"
+  }
+}
