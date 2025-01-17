@@ -25,7 +25,7 @@ export const IndexPage: FC<Props> = ({ session }) => {
             href="/login"
             class="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-8 rounded-full transition-colors duration-300 transform hover:scale-105"
           >
-            Get Computer
+            Login to Computer
           </a>
         )}
         {session.data.user !== undefined && (
