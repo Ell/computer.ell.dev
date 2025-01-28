@@ -13,6 +13,9 @@ import {
   doGamer,
   doHex,
   doSuperIdol,
+  doChangeTheme,
+  doForsen,
+  doSuperForsen,
 } from "./clonk";
 
 install({
@@ -129,20 +132,56 @@ app.get("/auth/redirect", async (c) => {
   return c.redirect("/");
 });
 
-app.get("/gamer", async (c) => {
+app.get("/redeem/:redeem", async (c) => {
   const session = c.get("session");
 
   if (!session.data.user) {
     return c.redirect("/");
   }
 
-  await doGamer(session.data.user.access_token);
-  await doSuperIdol(session.data.user.access_token);
-  await doHex(
-    session.data.user.access_token,
-    "maniac",
-    session.data.user.username
-  );
+  const redeem = c.req.param("redeem");
+
+  switch (redeem) {
+    case "gamer":
+      await doGamer(session.data.user.access_token);
+      break;
+
+    case "superidol":
+      await doSuperIdol(session.data.user.access_token);
+      break;
+
+    case "selfhex":
+      await doHex(
+        session.data.user.access_token,
+        "maniac",
+        session.data.user.username
+      );
+      break;
+
+    case "besttheme":
+      await doChangeTheme(session.data.user.access_token, "rosa");
+      break;
+
+    case "forsen":
+      await doForsen(session.data.user.access_token);
+      break;
+
+    case "superforsen":
+      await doSuperForsen(session.data.user.access_token);
+      break;
+
+    case "everything":
+      await doGamer(session.data.user.access_token);
+      await doSuperIdol(session.data.user.access_token);
+      await doHex(
+        session.data.user.access_token,
+        "maniac",
+        session.data.user.username
+      );
+      await doChangeTheme(session.data.user.access_token, "rosa");
+      await doSuperForsen(session.data.user.access_token)
+      break;
+  }
 
   return c.redirect("/");
 });

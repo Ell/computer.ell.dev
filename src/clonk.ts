@@ -76,3 +76,24 @@ export async function doHex(authToken: string, hex: string, target: string) {
   console.log("hex input", input);
   console.log("hex response", response);
 }
+
+export async function doChangeTheme(authToken: string, theme: string) {
+  const response = await doRedeem(authToken, "theme: " + theme);
+  console.log("change theme response", response);
+}
+
+export async function doForsen(authToken: string) {
+  const response = await doRedeem(authToken, "forsen");
+  console.log("change forsen response", response);
+}
+
+export async function doSuperForsen(authToken: string) {
+  console.log("forseing in progress...");
+
+  for (let i = 0; i < 20; i++) {
+    const response = await doRedeem(authToken, "forsen");
+    console.log(response);
+  }
+
+  console.log("forseing done");
+}
