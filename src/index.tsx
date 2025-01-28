@@ -136,7 +136,7 @@ app.get("/redeem/:redeem", async (c) => {
   const session = c.get("session");
 
   if (!session.data.user) {
-    return c.redirect("/")
+    return c.redirect("/");
   }
 
   const redeem = c.req.param("redeem");
