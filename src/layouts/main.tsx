@@ -16,11 +16,7 @@ export const MainLayout: FC<Props> = ({ session, children }) => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="A computer" />
         <meta name="author" content="ellg" />
-        <style>
-          @import
-          url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        </style>
-        <link ref="stylesheet" href="/css/site.css" />
+        <script defer src="/lib/htmx.min.js"></script>
         <script defer src="/js/site.js"></script>
       </head>
       <body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col font-sans">

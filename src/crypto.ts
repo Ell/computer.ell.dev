@@ -21,3 +21,47 @@ export async function hashCodeChallenge(
     .replace(/\//g, "_")
     .replace(/=+$/, "");
 }
+
+export async function buildHmacMessage(
+  request: Request,
+  messageId: string,
+  messageTimestamp: string
+): Promise<string> {
+  const body = await request.text();
+
+  return messageId + messageTimestamp + body;
+}
+
+export async function getHmac(
+  secret: string,
+  message: string
+): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: { name: "SHA-256" } },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    cryptoKey,
+    encoder.encode(message)
+  );
+
+  const hashArray = Array.from(new Uint8Array(signature));
+
+  return hashArray.map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+export function verifyMessage(hmac: string, verifySignature: string) {
+  const encoder = new TextEncoder();
+
+  return crypto.subtle.timingSafeEqual(
+    encoder.encode(hmac),
+    encoder.encode(verifySignature)
+  );
+}

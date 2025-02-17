@@ -12,26 +12,11 @@ id = "ea9596c42fa24e45aaac873e42ee5402"
 DOMAIN = "computer.ell.dev"
 CLIENT_ID = "ellgapp"
 REDIRECT_URI = "https://computer.ell.dev/auth/redirect"
+TWITCH_REDIRECT_URI = "https://computer.ell.dev/twitch/auth/redirect"
+TWITCH_CLIENT_ID = "xahn2w6b6fov6c5qga22kr1sn0t2pw"
 
 [observability.logs]
 enabled = true
 
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
-# [[r2_buckets]]
-# binding = "MY_BUCKET"
-# bucket_name = "my-bucket"
-
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "my-database"
-# database_id = ""
-
-# [ai]
-# binding = "AI"
-
-# [observability]
-# enabled = true
-# head_sampling_rate = 1
+[triggers]
+crons = ["0 * * * *"]

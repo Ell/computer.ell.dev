@@ -36,6 +36,14 @@ export const IndexPage: FC<Props> = ({ session }) => {
             Gamer Button
           </a>
         )}
+        {session.data.user?.username === "ellg" && (
+          <a
+            href="/admin"
+            class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-8 rounded-full transition-colors duration-300 transform hover:scale-105 mt-4"
+          >
+            Admin Panel
+          </a>
+        )}
       </main>
     </MainLayout>
   );
