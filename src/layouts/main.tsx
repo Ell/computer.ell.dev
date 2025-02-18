@@ -13,6 +13,7 @@ export const MainLayout: FC<Props> = ({ session, children }) => {
       <head>
         <meta charset="utf-8" />
         <title>computer</title>
+        <meta http-equiv="Cache-control" content="no-cache" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="A computer" />
         <meta name="author" content="ellg" />

@@ -8,4 +8,6 @@ interface Bindings {
   TWITCH_CLIENT_ID: string;
   TWITCH_CLIENT_SECRET: string;
   TWITCH_REDIRECT_URI: string;
+  VAPID_PUBLIC_KEY: string;
+  VAPID_PRIVATE_KEY: string;
 }

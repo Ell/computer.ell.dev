@@ -248,3 +248,81 @@ export async function getTwitchTeamMembers(
     }[];
   }>;
 }
+
+export async function getTwitchStream(
+  clientId: string,
+  appToken: string,
+  userId: string
+) {
+  const url = `https://api.twitch.tv/helix/streams?user_id=${userId}`;
+
+  const headers = {
+    Authorization: `Bearer ${appToken}`,
+    "Client-Id": clientId,
+  };
+
+  const request = await fetch(url, {
+    headers,
+  });
+
+  if (!request.ok) {
+    const error = await request.text();
+    console.error(error);
+    throw new Error("Failed to get twitch stream");
+  }
+
+  return request.json() as Promise<{
+    data: {
+      id: string;
+      user_id: string;
+      user_login: string;
+      user_name: string;
+      game_id: string;
+      game_name: string;
+      type: string;
+      title: string;
+      viewer_count: number;
+      started_at: string;
+      thumbnail_url: string;
+    }[];
+  }>;
+}
+
+export async function getTwitchUser(
+  clientId: string,
+  appToken: string,
+  userId: string
+) {
+  const url = `https://api.twitch.tv/helix/users?id=${userId}`;
+
+  const headers = {
+    Authorization: `Bearer ${appToken}`,
+    "Client-Id": clientId,
+  };
+
+  const request = await fetch(url, {
+    headers,
+  });
+
+  if (!request.ok) {
+    const error = await request.text();
+    console.error(error);
+    throw new Error("Failed to get twitch user");
+  }
+
+  return request.json() as Promise<{
+    data: {
+      id: string;
+      login: string;
+      display_name: string;
+      type: string;
+      broadcaster_type: string;
+      description: string;
+      profile_image_url: string;
+      offline_image_url: string;
+      view_count: number;
+      created_at: string;
+      title: string;
+    }[];
+  }>;
+}

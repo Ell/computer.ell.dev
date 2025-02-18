@@ -19,12 +19,16 @@ import {
   createSubscription,
   deleteSubscription,
   getAppToken,
+  getTwitchStream,
   getTwitchTeamMembers,
+  getTwitchUser,
   getUserToken,
+  refreshUserToken,
   twitchOauthScopes,
 } from "./twitch";
 import { buildHmacMessage, getHmac, verifyMessage } from "./crypto";
 import { chunk } from "./collections";
+import { buildPushPayload } from "@block65/webcrypto-web-push";
 
 install({
   darkMode: "class",
@@ -156,6 +160,38 @@ app.get("/gamer", async (c) => {
   );
 
   return c.redirect("/");
+});
+
+app.post("/notifications/register", async (c) => {
+  const session = c.get("session");
+
+  if (!session.data.user) {
+    return c.json({ error: "Not logged in" }, 401);
+  }
+
+  const payload = await c.req.json<{
+    subscription: { endpoint: string; keys: { p256dh: string; auth: string } };
+  }>();
+
+  if (!payload.subscription) {
+    return c.json({ error: "Invalid payload" }, 400);
+  }
+
+  if (
+    !payload.subscription.endpoint ||
+    !payload.subscription.keys.p256dh ||
+    !payload.subscription.keys.auth
+  ) {
+    return c.json({ error: "Invalid subscription data" }, 400);
+  }
+
+  // store in kv with sub prefix
+  await c.env.KV.put(
+    `notification:${payload.subscription.endpoint}`,
+    JSON.stringify(payload.subscription)
+  );
+
+  return c.body(null, 204);
 });
 
 app.get("/admin", async (c) => {
@@ -292,6 +328,15 @@ app.post("/twitch/eventsub", async (c) => {
     case MESSAGE_TYPE_NOTIFICATION:
       const notification = await c.req.json();
       console.log("got notification", notification);
+
+      if (notification.subscription.type === "stream.online") {
+        console.log("handling live notification");
+        await handleOnlineNotification(
+          c.env,
+          notification.event.broadcaster_user_id
+        );
+      }
+
       return c.body(null, 204);
     case MESSAGE_TYPE_REVOCATION:
       return c.body(null, 204);
@@ -299,6 +344,86 @@ app.post("/twitch/eventsub", async (c) => {
       return c.text("Unknown Message Type", 400);
   }
 });
+
+async function handleOnlineNotification(env: Bindings, userId: string) {
+  const appToken = await env.KV.get("twitch_app_token");
+  if (!appToken) {
+    console.error("No Twitch App Token Set");
+    return;
+  }
+
+  const twitchUser = await getTwitchStream(
+    env.TWITCH_CLIENT_ID,
+    appToken,
+    userId
+  );
+
+  const username = twitchUser.data[0].user_login;
+  const displayName = twitchUser.data[0].user_name;
+  const title = twitchUser.data[0].title;
+  const thumbnail = twitchUser.data[0].thumbnail_url;
+
+  let keys: KVNamespaceListKey<unknown, string>[] = [];
+  let cursor: string | undefined = undefined;
+  let isComplete = false;
+
+  console.log("fetching notification keys");
+
+  while (!isComplete) {
+    const notificationKeys: any = await env.KV.list({
+      prefix: "notification:",
+      cursor,
+    });
+
+    keys = [...keys, ...notificationKeys.keys];
+
+    cursor = notificationKeys.cursor;
+    isComplete = notificationKeys.list_complete;
+  }
+
+  console.log("got keys", keys);
+
+  const chunkedKeys = chunk(keys, 5);
+
+  for (const chunk of chunkedKeys) {
+    const notifications = await Promise.all(
+      chunk.map((key) => env.KV.get(key.name))
+    );
+
+    const payloadData = {
+      data: {
+        username,
+        displayName,
+        title,
+        thumbnail,
+      },
+      options: {
+        topic: "team-green-notification",
+        urgency: "high" as const,
+      },
+    };
+
+    const requests = notifications.map(async (notification, index) => {
+      if (!notification) {
+        return;
+      }
+
+      const subscription = JSON.parse(notification);
+
+      const payload = await buildPushPayload(payloadData, subscription, {
+        subject: "https://computer.ell.dev/",
+        publicKey: env.VAPID_PUBLIC_KEY,
+        privateKey: env.VAPID_PRIVATE_KEY,
+      });
+
+      console.log("sending notification payload", payload);
+
+      return fetch(subscription.endpoint, payload);
+    });
+
+    await Promise.all(requests);
+  }
+}
 
 async function updateTeamMembers(
   env: Bindings,
@@ -414,7 +539,7 @@ export default {
   ) => {
     switch (controller.cron) {
       // Every Hour
-      case "0 * * * *":
+      case "0 * * * *": {
         const accessToken = await env.KV.get("twitch_app_token");
         if (!accessToken) {
           console.error("No Twitch App Token Set");
@@ -424,8 +549,38 @@ export default {
         const clientId = env.TWITCH_CLIENT_ID;
 
         await updateTeamMembers(env, clientId, accessToken);
-      default:
+
         break;
+      }
+      case "*/30 * * * *": {
+        console.log("Refreshing Twitch User Token");
+
+        const refreshToken = await env.KV.get("twitch_user_refresh_token");
+        if (!refreshToken) {
+          console.error("No Twitch User Refresh Token Set");
+          return;
+        }
+
+        const clientSecret = env.TWITCH_CLIENT_SECRET;
+        const clientId = env.TWITCH_CLIENT_ID;
+
+        const refreshResponse = await refreshUserToken(
+          clientId,
+          clientSecret,
+          refreshToken
+        );
+
+        await env.KV.put("twitch_user_token", refreshResponse.access_token);
+        await env.KV.put(
+          "twitch_user_refresh_token",
+          refreshResponse.refresh_token
+        );
+
+        break;
+      }
+      default: {
+        break;
+      }
     }
   },
   fetch: (request: Request, env: Bindings, ctx: ExecutionContext) => {

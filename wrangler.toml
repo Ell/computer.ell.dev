@@ -14,9 +14,10 @@ CLIENT_ID = "ellgapp"
 REDIRECT_URI = "https://computer.ell.dev/auth/redirect"
 TWITCH_REDIRECT_URI = "https://computer.ell.dev/twitch/auth/redirect"
 TWITCH_CLIENT_ID = "xahn2w6b6fov6c5qga22kr1sn0t2pw"
+VAPID_PUBLIC_KEY = "BG9KvUazhqvGnoz2yifUiKk82c_TSUOVY2bVyg1Hg-JlgcbrTlhFSGFVh66qQ4EeWdtNHHLLnHUSIW2conBi6OI"
 
 [observability.logs]
 enabled = true
 
 [triggers]
-crons = ["0 * * * *"]
+crons = ["0 * * * *", "*/30 * * * *"]

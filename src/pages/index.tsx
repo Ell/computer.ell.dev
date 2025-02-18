@@ -29,12 +29,21 @@ export const IndexPage: FC<Props> = ({ session }) => {
           </a>
         )}
         {session.data.user !== undefined && (
-          <a
-            href="/gamer"
-            class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 px-8 rounded-full transition-colors duration-300 transform hover:scale-105"
-          >
-            Gamer Button
-          </a>
+          <>
+            <a
+              href="/gamer"
+              class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 px-8 rounded-full transition-colors duration-300 transform hover:scale-105"
+            >
+              Gamer Button
+            </a>
+            <button
+              onclick="onSubscribeClicked()"
+              title="Subscribe to get notified when anyone in Team Green goes live"
+              class="mt-4 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-full transition-colors duration-300 transform hover:scale-105"
+            >
+              Subscribe to Team Green
+            </button>
+          </>
         )}
         {session.data.user?.username === "ellg" && (
           <a
